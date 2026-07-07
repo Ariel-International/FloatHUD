@@ -87,8 +87,8 @@ class PurchaseManager(context: Context) : PurchasesUpdatedListener {
         val params = QueryProductDetailsParams.newBuilder()
             .setProductList(listOf(product))
             .build()
-        billingClient.queryProductDetailsAsync(params) { _, result ->
-            productDetails = result.productDetailsList.firstOrNull()
+        billingClient.queryProductDetailsAsync(params) { _, productDetailsList ->
+            productDetails = productDetailsList.firstOrNull()
         }
     }
 
