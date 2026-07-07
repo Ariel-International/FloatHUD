@@ -1,6 +1,9 @@
 package it.top.floathud
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
@@ -11,7 +14,9 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -22,6 +27,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var prefs: Prefs
     private lateinit var purchaseManager: PurchaseManager
+    private val notificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 
     private lateinit var statusText: TextView
     private lateinit var modeGroup: RadioGroup
@@ -46,6 +53,7 @@ class MainActivity : AppCompatActivity() {
 
         prefs = Prefs(this)
         purchaseManager = PurchaseManager(this)
+        requestNotificationPermissionIfNeeded()
 
         statusText = findViewById(R.id.statusText)
         modeGroup = findViewById(R.id.modeGroup)
@@ -94,6 +102,13 @@ class MainActivity : AppCompatActivity() {
         } else {
             "Overlay permission not granted yet — required to show the floating window"
         }
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        val granted = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        if (!granted) notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 
     private fun updateConfigVisibility() {
@@ -153,7 +168,7 @@ class MainActivity : AppCompatActivity() {
             else -> {}
         }
 
-        startService(intent)
+        startForegroundService(intent)
         Toast.makeText(this, "Floating overlay shown", Toast.LENGTH_SHORT).show()
         // The whole point is to overlay whatever app the user was in — get out of the way.
         moveTaskToBack(true)

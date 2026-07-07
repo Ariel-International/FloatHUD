@@ -1,5 +1,9 @@
 package it.top.floathud
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.graphics.PixelFormat
@@ -11,6 +15,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
+import androidx.core.app.NotificationCompat
 import java.time.ZoneId
 import java.util.UUID
 
@@ -54,6 +59,7 @@ class OverlayService : Service() {
     override fun onCreate() {
         super.onCreate()
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+        createNotificationChannel()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -124,7 +130,12 @@ class OverlayService : Service() {
         windowManager.addView(view, params)
         windows[instanceId] = OverlayWindow(view, params, controller)
 
-        if (windows.size == 1) handler.post(ticker)
+        if (windows.size == 1) {
+            startForeground(NOTIFICATION_ID, buildNotification())
+            handler.post(ticker)
+        } else {
+            updateNotification()
+        }
     }
 
     private fun removeOverlay(instanceId: String) {
@@ -132,11 +143,47 @@ class OverlayService : Service() {
             windowManager.removeView(it.view)
             it.controller.onDestroy()
         }
-        if (windows.isEmpty()) stopSelf()
+        if (windows.isEmpty()) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+            stopSelf()
+        } else {
+            updateNotification()
+        }
     }
 
     private fun removeAll() {
         windows.keys.toList().forEach { removeOverlay(it) }
+    }
+
+    private fun createNotificationChannel() {
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            "FloatHUD overlay",
+            NotificationManager.IMPORTANCE_LOW
+        )
+        channel.description = "Shows while a floating overlay is on screen."
+        getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+    }
+
+    private fun buildNotification(): Notification {
+        val stopIntent = PendingIntent.getService(
+            this, 0,
+            Intent(this, OverlayService::class.java).setAction(ACTION_REMOVE_OVERLAY),
+            PendingIntent.FLAG_IMMUTABLE
+        )
+        val count = windows.size
+        val text = if (count > 1) "$count overlays active" else "Overlay active"
+        return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText(text)
+            .setSmallIcon(android.R.drawable.ic_menu_manage)
+            .setOngoing(true)
+            .addAction(0, "Close all", stopIntent)
+            .build()
+    }
+
+    private fun updateNotification() {
+        getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, buildNotification())
     }
 
     private fun enableDrag(view: View, params: WindowManager.LayoutParams) {
@@ -182,5 +229,7 @@ class OverlayService : Service() {
         const val EXTRA_ZONE_IDS = "extra_zone_ids"
         private const val TICK_MS = 250L
         private const val RERAISE_EVERY_N_TICKS = 12 // ~3s at TICK_MS=250
+        private const val CHANNEL_ID = "floathud_overlay_channel"
+        private const val NOTIFICATION_ID = 2001
     }
 }
