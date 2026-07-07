@@ -155,6 +155,8 @@ class MainActivity : AppCompatActivity() {
 
         startService(intent)
         Toast.makeText(this, "Floating overlay shown", Toast.LENGTH_SHORT).show()
+        // The whole point is to overlay whatever app the user was in — get out of the way.
+        moveTaskToBack(true)
     }
 
     private fun addZone() {

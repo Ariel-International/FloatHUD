@@ -30,11 +30,24 @@ class OverlayService : Service() {
     private lateinit var windowManager: WindowManager
     private val windows = mutableMapOf<String, OverlayWindow>()
     private val handler = Handler(Looper.getMainLooper())
+    private var tickCount = 0
 
     private val ticker = object : Runnable {
         override fun run() {
             windows.values.forEach { it.controller.onTick() }
+            tickCount++
+            // Some apps (fullscreen games, other overlays) can push a TYPE_APPLICATION_OVERLAY
+            // window behind them when they regain focus. Periodically re-adding the view forces
+            // the window manager to restack it on top again.
+            if (tickCount % RERAISE_EVERY_N_TICKS == 0) bringAllToFront()
             if (windows.isNotEmpty()) handler.postDelayed(this, TICK_MS)
+        }
+    }
+
+    private fun bringAllToFront() {
+        windows.values.forEach { window ->
+            windowManager.removeView(window.view)
+            windowManager.addView(window.view, window.params)
         }
     }
 
@@ -168,5 +181,6 @@ class OverlayService : Service() {
         const val EXTRA_COUNTDOWN_MS = "extra_countdown_ms"
         const val EXTRA_ZONE_IDS = "extra_zone_ids"
         private const val TICK_MS = 250L
+        private const val RERAISE_EVERY_N_TICKS = 12 // ~3s at TICK_MS=250
     }
 }

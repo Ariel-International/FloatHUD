@@ -19,28 +19,28 @@
         android:layout_marginEnd="8dp"
         android:fontFamily="monospace" />
 
-    <Button
+    <ImageButton
         android:id="@+id/overlayStartStop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Start"
-        android:textSize="12sp"
-        android:minWidth="0dp"
-        android:minHeight="0dp"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="4dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:padding="6dp"
+        android:scaleType="fitCenter"
+        android:background="#33FFFFFF"
+        android:src="@android:drawable/ic_media_play"
+        android:tint="#FFFFFF"
+        android:contentDescription="Start"
         android:layout_marginEnd="4dp" />
 
-    <Button
+    <ImageButton
         android:id="@+id/overlayReset"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="↺"
-        android:textSize="12sp"
-        android:minWidth="0dp"
-        android:minHeight="0dp"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="4dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:padding="6dp"
+        android:scaleType="fitCenter"
+        android:background="#33FFFFFF"
+        android:src="@android:drawable/ic_menu_revert"
+        android:tint="#FFFFFF"
+        android:contentDescription="Reset"
         android:layout_marginEnd="4dp" />
 
     <TextView

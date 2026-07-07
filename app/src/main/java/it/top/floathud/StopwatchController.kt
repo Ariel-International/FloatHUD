@@ -2,15 +2,15 @@ package it.top.floathud
 
 import android.os.SystemClock
 import android.view.View
-import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 
 /** mm:ss stopwatch — direct port of the original OverlayService's counting logic. */
 class StopwatchController(view: View) : OverlayModeController {
 
     private val timerText: TextView = view.findViewById(R.id.overlayTimerText)
-    private val startStopButton: Button = view.findViewById(R.id.overlayStartStop)
-    private val resetButton: Button = view.findViewById(R.id.overlayReset)
+    private val startStopButton: ImageButton = view.findViewById(R.id.overlayStartStop)
+    private val resetButton: ImageButton = view.findViewById(R.id.overlayReset)
 
     private var running = false
     private var elapsedMs = 0L
@@ -24,7 +24,10 @@ class StopwatchController(view: View) : OverlayModeController {
 
     private fun toggle() {
         running = !running
-        startStopButton.text = if (running) "Stop" else "Start"
+        startStopButton.setImageResource(
+            if (running) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play
+        )
+        startStopButton.contentDescription = if (running) "Stop" else "Start"
         if (running) lastTickBase = SystemClock.elapsedRealtime()
     }
 

@@ -8,6 +8,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.view.View
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 
 /** Counts down from [durationMs] to zero, then alarms (vibrate + ringtone) until dismissed. */
@@ -20,8 +21,8 @@ class CountdownController(
     private val appContext = context.applicationContext
     private val timerText: TextView = view.findViewById(R.id.overlayTimerText)
     private val normalControls: View = view.findViewById(R.id.overlayNormalControls)
-    private val startStopButton: Button = view.findViewById(R.id.overlayStartStop)
-    private val resetButton: Button = view.findViewById(R.id.overlayReset)
+    private val startStopButton: ImageButton = view.findViewById(R.id.overlayStartStop)
+    private val resetButton: ImageButton = view.findViewById(R.id.overlayReset)
     private val dismissButton: Button = view.findViewById(R.id.overlayDismiss)
 
     private var running = false
@@ -39,7 +40,7 @@ class CountdownController(
 
     private fun toggle() {
         running = !running
-        startStopButton.text = if (running) "Stop" else "Start"
+        setStartStopIcon(running)
         if (running) lastTickBase = SystemClock.elapsedRealtime()
     }
 
@@ -48,8 +49,15 @@ class CountdownController(
         remainingMs = durationMs
         lastTickBase = SystemClock.elapsedRealtime()
         running = false
-        startStopButton.text = "Start"
+        setStartStopIcon(false)
         updateText()
+    }
+
+    private fun setStartStopIcon(isRunning: Boolean) {
+        startStopButton.setImageResource(
+            if (isRunning) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play
+        )
+        startStopButton.contentDescription = if (isRunning) "Stop" else "Start"
     }
 
     override fun onTick() {
