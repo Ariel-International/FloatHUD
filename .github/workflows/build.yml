@@ -1,0 +1,39 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      # No gradlew wrapper jar is committed to this repo, so Gradle itself
+      # is provisioned by this action instead of ./gradlew.
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.7
+
+      # assembleDebug is an aggregate task: with 4 product flavors it builds all four
+      # (stopwatch/countdown/worldclock/clock), each landing in its own output folder.
+      - name: Build debug APKs (all 4 flavors)
+        run: gradle assembleDebug
+
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: floathud-debug-apks
+          path: app/build/outputs/apk/*/debug/*.apk

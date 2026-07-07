@@ -1,0 +1,79 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    // Shared package for all flavors' Kotlin code/R class; each flavor overrides applicationId
+    // below so the four apps get distinct, independently publishable Play Store listings.
+    namespace 'it.top.floathud'
+    compileSdk 34
+
+    defaultConfig {
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName "0.1"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            debuggable true
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    buildFeatures {
+        viewBinding true
+        buildConfig true
+    }
+
+    // One shared codebase, four separately publishable apps. Each flavor is free on its own
+    // mode (FREE_MODE) and gates the other three behind the same Pro purchase flow; app_name
+    // per flavor lives in app/src/<flavor>/res/values/strings.xml.
+    flavorDimensions = ["app"]
+    productFlavors {
+        stopwatch {
+            dimension "app"
+            applicationId "it.top.floathudstopwatch"
+            buildConfigField "String", "FREE_MODE", '"STOPWATCH"'
+        }
+        countdown {
+            dimension "app"
+            applicationId "it.top.floathudcountdown"
+            buildConfigField "String", "FREE_MODE", '"COUNTDOWN"'
+        }
+        worldclock {
+            dimension "app"
+            applicationId "it.top.floathudworldclock"
+            buildConfigField "String", "FREE_MODE", '"WORLD_CLOCK"'
+        }
+        clock {
+            dimension "app"
+            applicationId "it.top.floathudclock"
+            buildConfigField "String", "FREE_MODE", '"CLOCK"'
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.1'
+    // One-time "Pro" purchase gating the other three modes and multiple overlays.
+    implementation 'com.android.billingclient:billing-ktx:7.1.1'
+}

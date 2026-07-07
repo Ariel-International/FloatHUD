@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:id="@+id/titleText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="14sp"
+            android:layout_marginBottom="16dp" />
+
+        <RadioGroup
+            android:id="@+id/modeGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="16dp">
+
+            <RadioButton
+                android:id="@+id/radioStopwatch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Stopwatch" />
+
+            <RadioButton
+                android:id="@+id/radioCountdown"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Countdown" />
+
+            <RadioButton
+                android:id="@+id/radioWorldClock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="World Clock" />
+
+            <RadioButton
+                android:id="@+id/radioClock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Clock" />
+
+        </RadioGroup>
+
+        <LinearLayout
+            android:id="@+id/countdownConfig"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:visibility="gone"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Duration (minutes):"
+                android:layout_marginEnd="8dp" />
+
+            <EditText
+                android:id="@+id/countdownMinutesInput"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:text="5" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/worldClockConfig"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <AutoCompleteTextView
+                    android:id="@+id/zoneSearchInput"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Search time zone"
+                    android:completionThreshold="1"
+                    android:layout_marginEnd="8dp" />
+
+                <Button
+                    android:id="@+id/addZoneButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Add" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/selectedZonesContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="8dp" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/buyProButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Unlock Pro (one-time purchase)"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/showOverlayButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show floating overlay" />
+
+    </LinearLayout>
+</ScrollView>

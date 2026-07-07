@@ -1,0 +1,3 @@
+<resources>
+    <style name="Theme.FloatHUD" parent="Theme.MaterialComponents.DayNight.NoActionBar" />
+</resources>
