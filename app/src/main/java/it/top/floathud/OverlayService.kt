@@ -121,11 +121,12 @@ class OverlayService : Service() {
                     ?: arrayListOf(ZoneId.systemDefault().id)
                 WorldClockController(view, zoneIds.map { ZoneId.of(it) })
             }
-            OverlayMode.CLOCK -> ClockController(view)
+            OverlayMode.CLOCK -> ClockController(view, TICK_MS)
         }
 
         view.findViewById<View>(R.id.overlayClose)?.setOnClickListener { removeOverlay(instanceId) }
-        enableDrag(view, params)
+        val onTap = (controller as? ClockController)?.let { clock -> { clock.reveal() } }
+        enableDrag(view, params, onTap)
 
         windowManager.addView(view, params)
         windows[instanceId] = OverlayWindow(view, params, controller)
@@ -186,7 +187,7 @@ class OverlayService : Service() {
         getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, buildNotification())
     }
 
-    private fun enableDrag(view: View, params: WindowManager.LayoutParams) {
+    private fun enableDrag(view: View, params: WindowManager.LayoutParams, onTap: (() -> Unit)? = null) {
         var initialX = 0
         var initialY = 0
         var touchX = 0f
@@ -206,6 +207,12 @@ class OverlayService : Service() {
                     params.y = initialY + (event.rawY - touchY).toInt()
                     windowManager.updateViewLayout(view, params)
                     true
+                }
+                MotionEvent.ACTION_UP -> {
+                    val movedX = kotlin.math.abs(event.rawX - touchX)
+                    val movedY = kotlin.math.abs(event.rawY - touchY)
+                    if (movedX < TAP_SLOP_PX && movedY < TAP_SLOP_PX) onTap?.invoke()
+                    false
                 }
                 else -> false
             }
@@ -231,5 +238,6 @@ class OverlayService : Service() {
         private const val RERAISE_EVERY_N_TICKS = 12 // ~3s at TICK_MS=250
         private const val CHANNEL_ID = "floathud_overlay_channel"
         private const val NOTIFICATION_ID = 2001
+        private const val TAP_SLOP_PX = 20f
     }
 }
