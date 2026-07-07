@@ -11,11 +11,17 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 
-/** Counts down from [durationMs] to zero, then alarms (vibrate + ringtone) until dismissed. */
+/**
+ * Counts down from [durationMs] to zero, then alarms (vibrate + ringtone) until dismissed. The
+ * button row auto-hides a few seconds after being shown (paused while the alarm is ringing, so
+ * Dismiss never disappears on you); [reveal] (wired to a tap on the overlay, and to any button
+ * press) brings it back and resets the countdown.
+ */
 class CountdownController(
     context: Context,
     view: View,
-    private val durationMs: Long
+    private val durationMs: Long,
+    tickMs: Long
 ) : OverlayModeController {
 
     private val appContext = context.applicationContext
@@ -24,6 +30,8 @@ class CountdownController(
     private val startStopButton: ImageButton = view.findViewById(R.id.overlayStartStop)
     private val resetButton: ImageButton = view.findViewById(R.id.overlayReset)
     private val dismissButton: Button = view.findViewById(R.id.overlayDismiss)
+    private val closeButton: View = view.findViewById(R.id.overlayClose)
+    private val autoHide = AutoHideControls(listOf(normalControls, closeButton), tickMs)
 
     private var running = false
     private var remainingMs = durationMs
@@ -38,10 +46,15 @@ class CountdownController(
         updateText()
     }
 
+    fun reveal() {
+        if (!alarming) autoHide.reveal()
+    }
+
     private fun toggle() {
         running = !running
         setStartStopIcon(running)
         if (running) lastTickBase = SystemClock.elapsedRealtime()
+        autoHide.reveal()
     }
 
     private fun reset() {
@@ -51,6 +64,7 @@ class CountdownController(
         running = false
         setStartStopIcon(false)
         updateText()
+        autoHide.reveal()
     }
 
     private fun setStartStopIcon(isRunning: Boolean) {
@@ -61,21 +75,24 @@ class CountdownController(
     }
 
     override fun onTick() {
-        if (!running || alarming) return
-        val now = SystemClock.elapsedRealtime()
-        remainingMs -= (now - lastTickBase)
-        lastTickBase = now
-        if (remainingMs <= 0) {
-            remainingMs = 0
-            running = false
-            triggerAlarm()
+        if (running && !alarming) {
+            val now = SystemClock.elapsedRealtime()
+            remainingMs -= (now - lastTickBase)
+            lastTickBase = now
+            if (remainingMs <= 0) {
+                remainingMs = 0
+                running = false
+                triggerAlarm()
+            }
+            updateText()
         }
-        updateText()
+        if (!alarming) autoHide.onTick()
     }
 
     private fun triggerAlarm() {
         alarming = true
         normalControls.visibility = View.GONE
+        closeButton.visibility = View.VISIBLE
         dismissButton.visibility = View.VISIBLE
 
         val vibrator = appContext.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
@@ -93,8 +110,8 @@ class CountdownController(
         ringtone?.stop()
         ringtone = null
         (appContext.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator)?.cancel()
-        normalControls.visibility = View.VISIBLE
         dismissButton.visibility = View.GONE
+        autoHide.reveal()
     }
 
     private fun updateText() {

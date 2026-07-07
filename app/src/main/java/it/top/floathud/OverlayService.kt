@@ -110,10 +110,10 @@ class OverlayService : Service() {
         params.y = 120 + cascade
 
         val controller: OverlayModeController = when (mode) {
-            OverlayMode.STOPWATCH -> StopwatchController(view)
+            OverlayMode.STOPWATCH -> StopwatchController(view, TICK_MS)
             OverlayMode.COUNTDOWN -> {
                 val durationMs = intent.getLongExtra(EXTRA_COUNTDOWN_MS, Prefs(this).countdownDurationMs)
-                CountdownController(this, view, durationMs)
+                CountdownController(this, view, durationMs, TICK_MS)
             }
             OverlayMode.WORLD_CLOCK -> {
                 val zoneIds = intent.getStringArrayListExtra(EXTRA_ZONE_IDS)
@@ -125,7 +125,12 @@ class OverlayService : Service() {
         }
 
         view.findViewById<View>(R.id.overlayClose)?.setOnClickListener { removeOverlay(instanceId) }
-        val onTap = (controller as? ClockController)?.let { clock -> { clock.reveal() } }
+        val onTap: (() -> Unit)? = when (controller) {
+            is ClockController -> ({ controller.reveal() })
+            is StopwatchController -> ({ controller.reveal() })
+            is CountdownController -> ({ controller.reveal() })
+            else -> null
+        }
         enableDrag(view, params, onTap)
 
         windowManager.addView(view, params)
